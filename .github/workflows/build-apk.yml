@@ -89,6 +89,19 @@ jobs:
             echo "রিপোজিটরির keystore/jonaki-release.jks ব্যবহার হচ্ছে"
           fi
 
+      - name: জাভা কম্পাইল ত্রুটি ঠিক করা (JSONException)
+        run: |
+          python3 - <<'PY'
+          import re
+          f = "android-overlay/java/JonakiNativePlugin.java"
+          s = open(f, encoding="utf-8").read()
+          old = "            } catch (Throwable t) {\n                cs.put(0.9d);\n            }"
+          new = "            } catch (Throwable t) {\n                try { cs.put(0.9d); } catch (Throwable ignored) { }\n            }"
+          assert old in s, "প্যাচের লাইন পাওয়া যায়নি"
+          open(f, "w", encoding="utf-8").write(s.replace(old, new, 1))
+          print("প্যাচ প্রয়োগ হয়েছে")
+          PY
+
       - name: নেটিভ কোড, পারমিশন, আইকন বসানো
         run: node scripts/patch-android.mjs
 
